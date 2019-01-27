@@ -4,7 +4,7 @@
  * -----------------------------------------------------------------------------
  * Plugin Name: Username Protection
  * Description: Prevent anonymous users from listing usernames via the REST API.
- * Version: 0.1.0
+ * Version: 0.1.1
  * Author: Code Potent
  * Author URI: https://codepotent.com
  * Plugin URI: https://github.com/johnalarcon/username-protection
@@ -131,18 +131,19 @@ class UsernameProtection {
 		if (is_user_logged_in()) {
 			return;
 		}
-
-		// If not a RESTful URL, no need to block access.
-		if (!strstr($_SERVER['REQUEST_URI'], '/wp-json/')) {
+		
+		// Is this the posts endpoint?
+		if (strstr($_SERVER['REQUEST_URI'], 'wp/v2/posts')) {
+			// If _embed argument is absent, no need to block access.
+			if (!isset($_REQUEST['_embed'])) {
+ 				return;
+ 			}
+		} else if (!strstr($_SERVER['REQUEST_URI'], 'wp/v2/users')) {
+			// ...also not the users endpoint, so no need to block access.
 			return;
 		}
-
-		// If not the endpoint that exposes usernames, no need to block access.
-		if (!strstr($_SERVER['REQUEST_URI'], '/users')) {
-			return;
-		}
-
-		// If here, block the user. No REST for the wicked!
+		
+		// If here, block access. No REST for the wicked!
 
 		// JSONify the output message.
 		$error = json_encode([$this->message_type => $this->message_text]);
