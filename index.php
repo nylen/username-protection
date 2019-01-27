@@ -132,7 +132,7 @@ class UsernameProtection {
 			return;
 		}
 		
-		// Is this the posts endpoint?
+		// Is this the posts or users endpoint?
 		if (strstr($_SERVER['REQUEST_URI'], 'wp/v2/posts')) {
 			// If _embed argument is absent, no need to block access.
 			if (!isset($_REQUEST['_embed'])) {
