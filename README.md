@@ -1,15 +1,6 @@
 # Username Protection
 
-ClassicPress provides many helpful REST API endpoints that expose data about your site. For the most part, this is a handy feature. In the case of usernames, however, allowing this endpoint to be accessed anonymously can make your site more susceptible to brut force attacks. This plugin prevents anonymous access to the endpoint.
-
-# Before Installing
-
-**Do you even need this plugin?** To find out, log out of your site, then open the following URLs in separate browser tabs. Be sure to replace  **https://www.yoursite.com/** with the URL to your ClassicPress installation.
-
-* https://www.yoursite.com/wp-json/wp/v2/users
-* https://www.yoursite.com/wp-json/wp/v2/posts?_embed
-
-Inspect the output of each URL. Do you find any _usernames_ **or** _display names_? If not, you're all set – you don't need this plugin! If you _do_ find usernames or display names, follow the instructions below to install the plugin.
+There are many vectors for hackers to discover your site's usernames – the starting point of a brute-force attack. Showing usernames is not a security risk, in itself – it becomes a risk when even a single user has a weak password. Usernames are exposed by the REST API, feeds, author archives, and more. This plugin locks them down without disabling any core functionality. In addition, because _usernames_ can often be extrapolated from _display names_, those are also protected.
 
 # Installation
 
@@ -19,6 +10,14 @@ Inspect the output of each URL. Do you find any _usernames_ **or** _display name
 
 # Usage
 
-There are no configuration settings – the plugin is designed to _just work_. If you would like to personally verify that it is working as expected, you can log out of the site and revisit the URLs above. When you are logged out, the usernames and display names are removed; when you are logged in, they are accessible, as expected.
+There are no configuration settings – the plugin is designed to _just work_. If you would like to personally verify that it is working as expected, you can log out of your site and you'll find that usernames and display names have magically vanished. The usernames and display names will be shown to all users who are logged in, to maintain the expected user experience.
+
+# Filters
+
+The plugin replaces usernames and display names with texts that should make sense in 99% of cases. If the texts don't suit your site design, you can use the built-in filters to customize them. Please see [this gist](https://gist.github.com/johnalarcon/ef83d7dd6ba11ac92795d2fa8256c43f) for examples of each.
+
+# Contributing
+
+Issue reports and pull requests are welcome – please submit your pulls against the [develop branch](https://github.com/johnalarcon/username-protection/tree/develop).
 
 **NOTE**: While this plugin _does_ work with WordPress, it may cause certain aspects of JetPack to fail. See [this thread](https://twitter.com/CodePotent/status/1078044924052795392) for a workaround.
