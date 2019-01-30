@@ -105,6 +105,9 @@ class UsernameProtection {
 		// Prevent leaks in REST requests.
 		add_filter('rest_authentication_errors', [$this, 'prevent_anonymous_username_enumeration']);
 		
+		// Prevent leaks in failed login attempts.
+		add_filter('login_errors', [$this, 'filter_login_errors']);
+		
 	}
 	
 	/**
@@ -208,8 +211,9 @@ class UsernameProtection {
 	/**
 	 * Filter comment display names.
 	 *
-	 * This method hides commenter's display names. ThisWhen comments are displayed, the username may or may not be exposed. This
-	 * filter prevents it.
+	 * This method replaces the display names on all comments. Note that this is
+	 * a filter for the core ClassicPress comments; it has no affect on external
+	 * commenting systems.
 	 *
 	 * @author John Alarcon
 	 *
@@ -229,7 +233,27 @@ class UsernameProtection {
 		return apply_filters($this->prefix.'_comments', __('Comment', 'username-protection'));
 		
 	}
-		
+	
+	/**
+	 * Filter login errors.
+	 *
+	 * This method replaces login error texts with a text that is less descript.
+	 * This prevents valid usernames from being confirmed.
+	 *
+	 * @author John Alarcon
+	 *
+	 * @since 0.2.0
+	 *
+	 * @param string $error_text The default error text.
+	 * @return string The amended error text.
+	 */
+	public function filter_login_errors($error_text) {
+	
+		// Replace the error text.
+		return apply_filters($this->prefix.'_login_errors', __('Login failed. Please try again.', 'username-protection'));
+
+	}
+	
 	/**
 	 * Prevent anonymous access to usernames.
 	 *
