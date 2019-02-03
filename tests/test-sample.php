@@ -9,12 +9,19 @@
  * Sample test case.
  */
 class SampleTest extends WP_UnitTestCase {
+	/**
+	 * A simple example test that always passes.
+	 */
+	public function test_passing() {
+		// Replace this with some actual testing code.
+		$this->assertEquals( 42, 42 );
+	}
 
 	/**
-	 * A single example test.
+	 * A simple example test that always fails.
 	 */
-	public function test_sample() {
+	public function test_failing() {
 		// Replace this with some actual testing code.
-		$this->assertTrue( true );
+		$this->assertEquals( 42, 'abc' );
 	}
 }
