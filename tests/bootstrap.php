@@ -2,7 +2,7 @@
 /**
  * PHPUnit bootstrap file
  *
- * @package .
+ * @package CodePotent\UsernameProtection
  */
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
