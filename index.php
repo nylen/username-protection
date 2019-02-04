@@ -50,22 +50,22 @@ if (!defined('ABSPATH')) {
 class UsernameProtection {
 
 	/**
-	 * Type of notice.
+	 * Type of error notice.
 	 *
-	 * This value is used as the key for the error text if user is anonymous.
+	 * This value is used as the code for the WP_Error returned if user is anonymous.
 	 *
-	 * @var string Array key for error message.
+	 * @var string Error code to display when API access is blocked.
 	 */
-	public $message_type;
+	public $error_code;
 
 	/**
-	 * Text of notice.
+	 * Text of error notice.
 	 *
 	 * This value is used for the error notice if user is anonymous.
 	 *
 	 * @var string Error message to display when API access is blocked.
 	 */
-	public $message_text;
+	public $error_text;
 
 	/**
 	 * A simple constructor fights gas and bloating!
@@ -77,12 +77,9 @@ class UsernameProtection {
 	 * @return void
 	 */
 	public function __construct() {
-
-		// Set notice key.
-		$this->message_type = __('notice', 'username-protection');
-
-		// Set notice text.
-		$this->message_text = __('authentication required', 'username-protection');
+		// Set WP_Error code and message for forbidden requests.
+		$this->error_code = 'rest_forbidden';
+		$this->error_text = __( 'Sorry, you are not allowed to do that.', 'username-protection' );
 
 		// Initialize the plugin.
 		$this->init();
@@ -103,8 +100,12 @@ class UsernameProtection {
 	public function init() {
 
 		// Hook the auth-checking method into the system.
-		add_filter('rest_authentication_errors', [$this, 'prevent_anonymous_username_enumeration']);
-
+		add_filter(
+			'rest_pre_dispatch',
+			[$this, 'prevent_anonymous_username_enumeration'],
+			10,
+			3
+		);
 	}
 
 	/**
@@ -118,39 +119,42 @@ class UsernameProtection {
 	 *
 	 * @since 0.1.0
 	 *
-	 * @return void
+	 * @param mixed           $result  Response that overrides the endpoint
+	 *                                 return value, if present.
+	 * @param WP_REST_Server  $server  API server instance.
+	 * @param WP_REST_Request $request Request used to generate the response.
+	 *
+	 * @return WP_Error|null
 	 */
-	public function prevent_anonymous_username_enumeration() {
+	public function prevent_anonymous_username_enumeration($result, $server, $request) {
 
 		// If user is admin, no need to block access.
 		if (current_user_can('manage_options')) {
-			return;
+			return $result;
 		}
 
 		// If user is logged in, *probably* no need to block access.
 		if (is_user_logged_in()) {
-			return;
+			return $result;
 		}
-		
+
 		// Is this the posts or users endpoint?
-		if (strstr($_SERVER['REQUEST_URI'], 'wp/v2/posts')) {
+		if (strstr($request->get_route(), 'wp/v2/posts')) {
 			// If _embed argument is absent, no need to block access.
-			if (!isset($_REQUEST['_embed'])) {
- 				return;
- 			}
-		} else if (!strstr($_SERVER['REQUEST_URI'], 'wp/v2/users')) {
+			if (!isset($_GET['_embed'])) {
+				return $result;
+			}
+		} else if (!strstr($request->get_route(), 'wp/v2/users')) {
 			// ...also not the users endpoint, so no need to block access.
-			return;
+			return $result;
 		}
-		
+
 		// If here, block access. No REST for the wicked!
-
-		// JSONify the output message.
-		$error = json_encode([$this->message_type => $this->message_text]);
-
-		// Kill the script with fire.
-		die($error);
-
+		return new \WP_Error(
+			$this->error_code,
+			$this->error_text,
+			['status' => rest_authorization_required_code()]
+		);
 	}
 
 }
