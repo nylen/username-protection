@@ -31,7 +31,7 @@ class RESTProtectionTest extends WP_UnitTestCase {
 		// Override the REST API server object with one designed for testing.
 		$GLOBALS['wp_rest_server'] = $this->server = new Spy_REST_Server();
 		// Register the ClassicPress built-in REST API endpoints.
-		create_initial_rest_routes();
+		do_action( 'rest_api_init' );
 		// Call any setUp() functions of parent test classes.
 		parent::setUp();
 	}
